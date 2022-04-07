@@ -17,8 +17,22 @@ from config import CFG
 #     df_all = df_all[:200]
 #     CFG.num_epochs = 10
 
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Running Config <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+target_gpu = 0
+data_fold= 0
+
+print(30*">", "Running Config" , 30*">" )
+for key in CFG.__dict__.keys():
+    print(f'{key}: {CFG.__dict__[key]}')
+print('\n'*2)
+print(f"Target GPU: {target_gpu}")
+print(f"Fold: {data_fold}")
+print(2*"\n",28*">", "End Running Config" , 28*">",2*"\n" )
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>> End Running Config <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
 ################################# DATASET LOADING #############################
-train_dataset, valid_dataset = get_dataset()
+train_dataset, valid_dataset = get_dataset(fold=data_fold)
 train_loader = DataLoader(train_dataset,
                           batch_size=CFG.batch_size,
                           shuffle=True,
@@ -56,7 +70,7 @@ checkpoint_callback = ModelCheckpoint(monitor='valid_loss',
                                       mode='min')
 
 trainer = Trainer(max_epochs=CFG.num_epochs,
-                gpus=[1],
+                gpus=[target_gpu],
                 accumulate_grad_batches=CFG.accum,
                 precision=CFG.precision,
                 callbacks=[checkpoint_callback], 
