@@ -21,7 +21,8 @@ class CFG:
     final_div_factor = 1.0e+3
     num_epochs = 40
     batch_size = 16
+    num_cpu_workers = 8
     accum = 1
     precision = 16
     n_fold = 4
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    # device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')

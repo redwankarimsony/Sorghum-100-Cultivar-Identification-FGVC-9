@@ -11,6 +11,7 @@ from torch.utils.data import Dataset, DataLoader
 import albumentations as A
 from albumentations.core.composition import Compose, OneOf
 from albumentations.pytorch import ToTensorV2
+from sklearn.model_selection import StratifiedKFold
 
 
 class SorghumDataset(Dataset):
@@ -90,18 +91,46 @@ def get_transform(phase: str):
         ])
 
 
-df_all = pd.read_csv(CFG.class_mapping_file).dropna(inplace=False)
-print(len(df_all))
+def get_dataset():
+    df_all = pd.read_csv(CFG.class_mapping_file).dropna(inplace=False)
+    print(len(df_all))
 
-unique_cultivars = list(df_all["cultivar"].unique())
-num_classes = len(unique_cultivars)
+    unique_cultivars = list(df_all["cultivar"].unique())
+    num_classes = len(unique_cultivars)
 
-CFG.num_classes = num_classes
-print(num_classes)
+    CFG.num_classes = num_classes
+    print(num_classes)
+
+    df_all["file_path"] = df_all["image"].apply(lambda image: os.path.join(CFG.train_dir, image))
+    df_all["cultivar_index"] = df_all["cultivar"].map(lambda item: unique_cultivars.index(item))
+    df_all["is_exist"] = df_all["file_path"].apply(lambda file_path: os.path.exists(file_path))
+    df_all = df_all[df_all.is_exist == True]
+    df_all.head()
+
+    skf = StratifiedKFold(n_splits=CFG.n_fold, shuffle=True, random_state=CFG.seed)
+
+    
+    # for train_idx, valid_idx in skf.split(df_all['image'], df_all["cultivar_index"]):
+    #     df_train = df_all.iloc[train_idx]
+    #     df_valid = df_all.iloc[valid_idx]
+    
+    fold = 1
+    train_idx, valid_idx= list(skf.split(df_all['image'], df_all["cultivar_index"]))[fold]
+    df_train = df_all.iloc[train_idx]
+    df_valid = df_all.iloc[valid_idx]
+    
+
+    print(f"train size: {len(df_train)}")
+    print(f"valid size: {len(df_valid)}")
+
+    print(df_train.cultivar.value_counts())
+    print(df_valid.cultivar.value_counts())
+
+    train_dataset = SorghumDataset(df_train, get_transform('train'))
+    valid_dataset = SorghumDataset(df_valid, get_transform('valid'))
+
+    return train_dataset, valid_dataset
 
 
-df_all["file_path"] = df_all["image"].apply(lambda image: os.path.join(CFG.train_dir, image))
-df_all["cultivar_index"] = df_all["cultivar"].map(lambda item: unique_cultivars.index(item))
-df_all["is_exist"] = df_all["file_path"].apply(lambda file_path: os.path.exists(file_path))
-df_all = df_all[df_all.is_exist == True]
-df_all.head()
+if __name__ == "__main__":
+    x, y = get_dataset()
