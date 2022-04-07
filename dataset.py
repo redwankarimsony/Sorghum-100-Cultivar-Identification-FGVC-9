@@ -1,6 +1,7 @@
-import torch
-import cv2
 import os
+import cv2
+import torch
+
 
 import pandas as pd
 import numpy as np
@@ -19,6 +20,7 @@ class SorghumDataset(Dataset):
         self.image_path = df['file_path'].values
         self.labels = df["cultivar_index"].values
         self.transform = transform
+        
 
     def __len__(self):
         return len(self.labels)
@@ -91,15 +93,15 @@ def get_transform(phase: str):
         ])
 
 
-def get_dataset():
+def get_dataset(fold = 0):
     df_all = pd.read_csv(CFG.class_mapping_file).dropna(inplace=False)
-    print(len(df_all))
+    print("Total Number of images found:", len(df_all))
 
     unique_cultivars = list(df_all["cultivar"].unique())
     num_classes = len(unique_cultivars)
 
     CFG.num_classes = num_classes
-    print(num_classes)
+    print("Total Number of Classes:", num_classes, 3*"\n")
 
     df_all["file_path"] = df_all["image"].apply(lambda image: os.path.join(CFG.train_dir, image))
     df_all["cultivar_index"] = df_all["cultivar"].map(lambda item: unique_cultivars.index(item))
@@ -114,17 +116,16 @@ def get_dataset():
     #     df_train = df_all.iloc[train_idx]
     #     df_valid = df_all.iloc[valid_idx]
     
-    fold = 1
     train_idx, valid_idx= list(skf.split(df_all['image'], df_all["cultivar_index"]))[fold]
     df_train = df_all.iloc[train_idx]
     df_valid = df_all.iloc[valid_idx]
     
 
-    print(f"train size: {len(df_train)}")
-    print(f"valid size: {len(df_valid)}")
+    # print(f"train size: {len(df_train)}")
+    # print(f"valid size: {len(df_valid)}")
 
-    print(df_train.cultivar.value_counts())
-    print(df_valid.cultivar.value_counts())
+    # print(df_train.cultivar.value_counts())
+    # print(df_valid.cultivar.value_counts())
 
     train_dataset = SorghumDataset(df_train, get_transform('train'))
     valid_dataset = SorghumDataset(df_valid, get_transform('valid'))
