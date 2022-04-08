@@ -19,8 +19,8 @@ from config import CFG
 
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Running Config <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-target_gpu = 0
-data_fold= 0
+target_gpu = 1
+data_fold= 3
 
 print(30*">", "Running Config" , 30*">" )
 for key in CFG.__dict__.keys():
