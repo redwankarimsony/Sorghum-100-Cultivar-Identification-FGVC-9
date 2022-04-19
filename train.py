@@ -1,3 +1,4 @@
+import torch
 from torch.utils.data import DataLoader
 from dataset import SorghumDataset, get_dataset, get_transform
 from models_zoo import CustomEffNet
@@ -20,7 +21,7 @@ from config import CFG
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Running Config <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 target_gpu = 1
-data_fold= 3
+data_fold = 1
 
 print(30*">", "Running Config" , 30*">" )
 for key in CFG.__dict__.keys():
@@ -51,10 +52,9 @@ valid_loader = DataLoader(valid_dataset,
    
 
 CFG.steps_per_epoch = len(train_loader)
-
-
 model = CustomEffNet(model_name=CFG.model_name, pretrained=CFG.pretrained)
 lit_model = LitSorghum(model.model)
+
 
 
 
@@ -64,7 +64,7 @@ logger.log_hyperparams(CFG.__dict__)
 checkpoint_callback = ModelCheckpoint(monitor='valid_loss',
                                       save_top_k=1,
                                       save_last=True,
-                                      save_weights_only=True,
+                                      save_weights_only=False,
                                       filename='{epoch:02d}-{valid_loss:.4f}-{valid_acc:.4f}',
                                       verbose=False,
                                       mode='min')
@@ -77,7 +77,7 @@ trainer = Trainer(max_epochs=CFG.num_epochs,
                 logger=logger,
                 weights_summary='top',)
 
-trainer.fit(lit_model, train_dataloaders=train_loader, val_dataloaders=valid_loader)
+trainer.fit(lit_model, train_dataloaders=train_loader, val_dataloaders=valid_loader,)
 
 
                        

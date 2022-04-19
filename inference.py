@@ -67,11 +67,11 @@ def make_predictions(model_name, ckpt_file, data_dir, inp_sub_file, out_sub_file
 
 if __name__ == '__main__':
     os.makedirs("results", exist_ok=True)
-    model_name = "tf_efficientnet_b3_ns"
+    model_name = "tf_efficientnet_b5_ns"
     
-    for ver in range(CFG.n_fold):
+    for ver in range(0, 2):
         version = f"version_{ver}"
-        checkpoint_file = os.path.join("logs", model_name, version, "checkpoints", "last.ckpt")
+        checkpoint_file = os.path.join("logs", model_name, version, "checkpoints", "best.ckpt")
         output_submission_file = os.path.join("results", f"{model_name}-{version}-submission.csv")
         input_submission_file = os.path.join(CFG.data_dir, 'sample_submission.csv')
 
