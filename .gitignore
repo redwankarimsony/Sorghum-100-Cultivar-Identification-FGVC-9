@@ -1,6 +1,6 @@
 # Excluding data file
-data/
-
+data/*
+*.ckpt
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
